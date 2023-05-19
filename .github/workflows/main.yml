@@ -1,0 +1,65 @@
+name: Build docker-autoheal
+on:
+  push:
+    paths:
+      - .github/workflows/main.yml
+    branches:
+      - main
+  schedule:
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build and push to registry
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone the repository
+        uses: actions/checkout@v3
+        with:
+          repository: https://github.com/tylerpace/docker-autoheal.git
+
+      - name: Tar as root
+        run: |
+          sudo mv -fv /usr/bin/tar /usr/bin/tar.orig
+          echo -e '#!/bin/sh\n\nsudo /usr/bin/tar.orig "$@"' | sudo tee -a /usr/bin/tar
+          sudo chmod +x /usr/bin/tar
+
+      - name: Enable caching for podman
+        id: cache-podman-restore
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            ~/.local/share/containers
+          key: ${{ runner.os }}-${{ runner.arch }}-docker-autoheal-build
+
+      - name: Log in to Quay
+        uses: redhat-actions/podman-login@v1
+        with: 
+          registry: "quay.io"
+          username: ${{ secrets.ZENITH_QUAY_USER }}
+          password: ${{ secrets.ZENITH_QUAY_TOKEN }}
+
+      - name: Build container
+        id: build
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: docker-autoheal
+          tags: latest
+          layers: true
+          containerfiles: |
+            ./Dockerfile
+
+      - name: Push to Quay
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build.outputs.image }}
+          tags: ${{ steps.build.outputs.tags }}
+          registry: quay.io/zenithtecnologia
+
+      - name: Update caching for podman
+        uses: actions/cache/save@v3
+        with:
+          path: |
+            ~/.local/share/containers
+          key: ${{ steps.cache-podman-restore.outputs.cache-primary-key }}
