@@ -17,7 +17,7 @@ jobs:
       - name: Clone the repository
         uses: actions/checkout@v3
         with:
-          repository: https://github.com/tylerpace/docker-autoheal.git
+          repository: tylerpace/docker-autoheal
 
       - name: Tar as root
         run: |
