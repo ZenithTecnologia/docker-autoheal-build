@@ -55,6 +55,8 @@ jobs:
         with:
           image: ${{ steps.build.outputs.image }}
           tags: ${{ steps.build.outputs.tags }}
+          username: ${{ secrets.ZENITH_QUAY_USER }}
+          password: ${{ secrets.ZENITH_QUAY_TOKEN }}
           registry: quay.io/zenithtecnologia
           
       - name: Push to Quay - Pqatsi
@@ -62,6 +64,8 @@ jobs:
         with:
           image: ${{ steps.build.outputs.image }}
           tags: ${{ steps.build.outputs.tags }}
+          username: ${{ secrets.PQATSI_QUAY_USER }}
+          password: ${{ secrets.PQATSI_QUAY_TOKEN }}
           registry: quay.io/pqatsi
 
       - name: Update caching for podman
