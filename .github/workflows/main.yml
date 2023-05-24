@@ -50,12 +50,19 @@ jobs:
           containerfiles: |
             ./Dockerfile
 
-      - name: Push to Quay
+      - name: Push to Quay - Zenith
         uses: redhat-actions/push-to-registry@v2
         with:
           image: ${{ steps.build.outputs.image }}
           tags: ${{ steps.build.outputs.tags }}
           registry: quay.io/zenithtecnologia
+          
+      - name: Push to Quay - Pqatsi
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build.outputs.image }}
+          tags: ${{ steps.build.outputs.tags }}
+          registry: quay.io/pqatsi
 
       - name: Update caching for podman
         uses: actions/cache/save@v3
